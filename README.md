@@ -1,8 +1,6 @@
 
 ## Neptune ML Toolkit
 
-[![GitHub license](docs/static/apache2.svg)](./LICENSE)
-
 The Neptune ML Toolkit is a python library for developing models for machine learning on graphs with [Amazon Neptune ML](https://aws.amazon.com/neptune/machine-learning/), a feature of [Amazon Neptune](https://aws.amazon.com/neptune/).
 Amazon Neptune ML makes it possible to automatically train and deploy graph machine learning models to help find hidden patterns and extract useful insights from your heterogeneous graph data stored in the Amazon Neptune Graph Database.
 Amazon Neptune ML uses Deep Graph Library ([DGL](https://www.dgl.ai/)) and [Amazon SageMaker](https://aws.amazon.com/sagemaker/) to build and train Graph Neural Networks (GNNs), a machine learning technique purpose-built for graphs, for tasks such as Node Classification/Regression, Link Prediction or Edge Classification.
