@@ -1,0 +1,16 @@
+name: neptune_ml_p36
+channels:
+  - pytorch
+  - dglteam
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.6
+  - pytorch=1.7.1
+  - torchvision=0.8
+  - cudatoolkit=11.0
+  - dgl-cuda11.0=0.7.1
+  - spacy=3.0.5
+  - rdflib==5.0.0
+  - sagemaker-python-sdk
+  - ipykernel
