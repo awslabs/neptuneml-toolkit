@@ -15,10 +15,13 @@ The toolkit contains [examples](./examples) of custom model implementations and 
 
 ## Getting Started
 The fastest way to get started is to use the Neptune ML [AWS CloudFormation quick start tempalates](https://docs.aws.amazon.com/neptune/latest/userguide/machine-learning.html#machine-learning-quick-start).
-Launching the template installs all necessary components, including a Neptune DB cluster and a Jupyter Notebook instance, with the Neptune ML toolkit preinstalled.
+Launching the template installs all necessary components, including a Neptune DB cluster and a Jupyter Notebook instance, with the Neptune ML Toolkit preinstalled.
 
 [![Templates launch](./images/templates.png)](https://docs.aws.amazon.com/neptune/latest/userguide/machine-learning.html#machine-learning-quick-start)
 
+Follow the instructions to finish setting the cloud formation stack and then navigate to the SageMaker notebook with the Neptune ML Toolkit pre-installed to begin exploring your graph data and developing models.
+
+### Local installation
 To use the Neptune ML toolkit in a local environment you can clone the repo by running:
 
 * `git clone https://github.com/awslabs/neptuneml-toolkit.git`
@@ -31,11 +34,11 @@ or
 
 Activate the environment by running
 
-`conda activate neptune_ml_p36`
+* `conda activate neptune_ml_p36`
 
 and then install the package using pip
 
-`pip install neptuneml-toolkit`
+* `pip install neptuneml-toolkit`
 
 
 ## Security
