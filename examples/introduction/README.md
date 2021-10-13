@@ -6,8 +6,8 @@ This folder contains introductory examples for implementing custom models for Ne
 |             Task            |       Example Notebook    | Model |
 | :-----------------------------: | :---------------------: | :---------------------: |
 | Node Classification| [Introduction-to-Custom-Node-Classification-Gremlin](./movie-lens-rgcn/01-Introduction-to-Custom-Node-Classification-Gremlin.ipynb) | RGCN |
-| Node Regression    | [Introduction-to-Custom-Node-Regression-Gremlin](./movie-lens-rgcn/01-Introduction-to-Custom-Node-Regression-Gremlin.ipynb) | RGCN |
-| Link Prediction   |  [Introduction-to-Custom-Link-Prediction-Gremlin](./movie-lens-rgcn/01-Introduction-to-Custom-Link-Prediction-Gremlin.ipynb)  | RGCN |
+| Node Regression    | [Introduction-to-Custom-Node-Regression-Gremlin](./movie-lens-rgcn/02-Introduction-to-Custom-Node-Regression-Gremlin.ipynb) | RGCN |
+| Link Prediction   |  [Introduction-to-Custom-Link-Prediction-Gremlin](./movie-lens-rgcn/03-Introduction-to-Custom-Link-Prediction-Gremlin.ipynb)  | RGCN |
 
 
 ### Extending introductory examples
