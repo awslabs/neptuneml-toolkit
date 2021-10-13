@@ -1,4 +1,4 @@
-![header](images/banner.png)
+![banner](images/banner.png)
 
 ## Neptune ML Toolkit
 
