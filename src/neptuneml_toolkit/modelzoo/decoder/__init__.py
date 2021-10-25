@@ -1,2 +1,2 @@
-from .bilinear import *
+from .dotproduct import *
 from .distmult import *
