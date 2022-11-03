@@ -14,7 +14,7 @@ if __name__ == "__main__":
                            'task': 'node_class', 'model': 'rgcn', 'name': 'rgcn-link-predict',
                            'weight-decay': 0.0, 'n-epochs': 2, 'hidden-size': 128, 'num-bases': 2,
                            'num-encoder-layers': 2, 'num-negs':10}
-        data_path, model_path, devices = './data', './output', [-1]
+        data_path, model_path, devices = './lp-tmp', './lp-out', [-1]
     else:
         data_path, model_path, devices, hyperparameters = get_transform_config()
 

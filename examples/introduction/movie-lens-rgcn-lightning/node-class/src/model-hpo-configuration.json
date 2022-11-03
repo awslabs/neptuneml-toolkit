@@ -2,15 +2,15 @@
   "models": [
     {
       "model": "custom",
-      "task_type": "link_predict",
+      "task_type": "node_class",
       "eval_metric": {
         "tuning_objective": {
-          "MetricName": "MRR",
+          "MetricName": "Accuracy",
           "Type": "Maximize"
         },
         "metric_definitions": [{
-          "Name": "MRR",
-          "Regex": "Validation average MRR[ ]*: (\\S*)"
+          "Name": "Accuracy",
+          "Regex": "Validation Accuracy=([0-9\\.]+)"
         }]
       },
       "1-tier-param": [
@@ -36,7 +36,7 @@
           "param": "n-epochs",
           "range": [
             3,
-            100
+            30
           ],
           "inc_strategy": "linear",
           "inc_val": 1,
@@ -73,14 +73,7 @@
           "inc_strategy": "log",
           "type": "float",
           "default": 0
-        },
-        {
-          "param": "num-negs",
-          "range": [4, 32],
-          "default": 10,
-          "type": "int",
-          "inc_strategy": "power2"
-       }
+        }
       ],
       "3-tier-param": [
         {
@@ -97,6 +90,11 @@
       "fixed-param": [
         {
           "param": "num-encoder-layers",
+          "type": "int",
+          "default": 2
+        },
+        {
+          "param": "num-decoder-layers",
           "type": "int",
           "default": 1
         }
