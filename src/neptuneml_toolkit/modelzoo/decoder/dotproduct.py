@@ -51,7 +51,7 @@ class GraphDotProductDecoder(nn.Module):
     """
 
     def __init__(self):
-        super(DotProductDecoder, self).__init__()
+        super(GraphDotProductDecoder, self).__init__()
 
     def forward(self, graph, h):
         """Forward function.

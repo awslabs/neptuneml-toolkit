@@ -1,0 +1,85 @@
+{
+  "models": [
+    {
+      "model": "custom",
+      "task_type": "node_class",
+      "eval_metric": {
+        "tuning_objective": {
+          "MetricName": "ROC_AUC",
+          "Type": "Maximize"
+        },
+        "metric_definitions": [{
+          "Name": "ROC_AUC",
+          "Regex": "validation-auc:([0-9\\.]+)"
+        }]
+      },
+      "1-tier-param": [
+        {
+          "param": "max-depth",
+          "range": [
+            2,
+            8
+          ],
+          "type": "int",
+          "inc_strategy": "power2"
+        },
+        {
+          "param": "eta",
+          "range": [
+            0.1,
+            0.5
+          ],
+          "type": "float",
+          "inc_strategy": "linear"
+        },
+        {
+          "param": "gamma",
+          "range": [
+            2,
+            10
+          ],
+          "inc_strategy": "linear",
+          "inc_val": 2,
+          "type": "int"
+        },
+        {
+          "param": "min-child-weight",
+          "range": [
+            2,
+            10
+          ],
+          "inc_strategy": "linear",
+          "inc_val": 2,
+          "type": "int"
+        }
+      ],
+      "2-tier-param": [
+        {
+          "param": "num-round",
+          "range": [
+            10,
+            100
+          ],
+          "inc_strategy": "linear",
+          "type": "int",
+          "inc_val": 10,
+          "default": 30
+        }
+      ],
+      "3-tier-param": [
+      ],
+      "fixed-param": [
+        {
+          "param": "subsample",
+          "type": "float",
+          "default": 7e-1
+        },
+        {
+          "param": "verbosity",
+          "type": "int",
+          "default": 1
+        }
+      ]
+    }
+  ]
+}

@@ -26,7 +26,7 @@ VERSION = '0.0.1'
 setup(
     name='neptuneml-toolkit',
     version=VERSION,
-    description='neptuneml toolkit for python',
+    description='Open source library for training models with Amazon Neptune ML',
     maintainer='Neptune ML Team',
     maintainer_email='sojiadeshina@gmail.com',
     packages=find_packages(),

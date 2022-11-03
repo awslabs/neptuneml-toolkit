@@ -201,6 +201,39 @@ def get_test_nids(g, target_ntype=None):
     test_idx = test_idx[test_mask.bool()]
     return test_idx
 
+def get_test_eids(g, target_etype=None, include_reverse_etypes=False):
+    r"""
+
+    get validation node ids from the graph
+
+    Parameters
+    ----------
+    g : dgl.DGLGraph
+        the Graph
+    target_etype : str
+        the node type of the targets
+    include_reverse_etypes : bool (default: False)
+        whether to include edge ids from reversed edge types.
+    Returns
+    -------
+    test_idx: th.Tensor or dict[etype:str : th.Tensor]
+    """
+    test_mask = {target_etype: g.edges[target_etype].data['test_mask']} if target_etype  else g.edata['test_mask']
+    if include_reverse_etypes and isinstance(train_mask, Mapping):
+        for etype in test_mask:
+            src_type, rel_type, dst_type = etype
+            if "rev-" in rel_type and (dst_type, rel_type.replace("rev-", ""), src_type) in test_mask:
+                test_mask[etype] = g.edata['rev_test_mask'][etype]
+    if isinstance(test_mask, Mapping):
+        test_idx = {}
+        for etype in test_mask:
+            idx = th.arange(test_mask[etype].shape[0])
+            test_idx[etype] = idx[test_mask[etype].bool()]
+    else:
+        test_idx = th.arange(test_mask.shape[0])
+        test_idx = test_idx[test_mask.bool()]
+    return test_idx
+
 
 def normalize_hyperparameter_keys(params):
     r"""
