@@ -4,8 +4,8 @@ This folder contains examples of Neptune ML custom model implementations for var
 
 ### Extending introductory examples
 
-* [Using Pytorch Lightning to eliminate boilerplate](./movie-lens-rgcn-lightning)
+* [Using Pytorch Lightning to eliminate boilerplate (this folder)](./)
 * [Accelerate model training with multi GPU](./movie-lens-rgcn-multigpu)
-* [Custom GNN using DGL nn module](./movie-lens-rgcn-dgl)
+* [Custom GNN using DGL nn module](./movie-lens-rgcn-nn-module)
 
 
