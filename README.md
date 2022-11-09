@@ -8,8 +8,9 @@ Amazon Neptune ML uses Deep Graph Library ([DGL](https://www.dgl.ai/)) and [Amaz
 See the [Neptune ML documentation](https://docs.aws.amazon.com/neptune/latest/userguide/machine-learning.html) page to learn more.
 
 
-With this toolkit, you can [develop custom models](https://docs.aws.amazon.com/neptune/latest/userguide/machine-learning-custom-models.html) to be used with Amazon Neptune ML, using DGL and other python libraries.
-The toolkit contains [examples](./examples) of custom model implementations and a model zoo with DGL implementations for popular heterogeneous graph models.
+With this toolkit, you can easily train and deploy GNN models with Neptune ML. You can interact with Neptune ML model management APIs with the `NeptuneMLClient` object.
+You can also [develop custom models](https://docs.aws.amazon.com/neptune/latest/userguide/machine-learning-custom-models.html) to be used with Amazon Neptune ML, using DGL and other python libraries.
+The toolkit contains [examples](./examples/custom-models) of custom model implementations and a model zoo with DGL implementations for popular heterogeneous graph models.
 
 
 ## Getting Started
