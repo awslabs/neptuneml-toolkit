@@ -676,29 +676,21 @@ class NeptuneMLClient():
             delete_result = self.client.endpoints_delete(id)
         delete_result.raise_for_status()
 
-    def get_node_index_mapping(self, model_training_job_id=None, data_processing_job_id=None, vertex_label=None,
-                               download_location='./model-artifacts'):
-        assert model_training_job_id is not None or data_processing_job_id is not None, \
-            "You must provide either a model training job id or a data processing job id to obtain node to index mappings"
+    def get_node_index_mapping(self, data_processing_job_id=None, vertex_label=None, download_location='./model-artifacts'):
+        assert data_processing_job_id is not None, \
+            "You must provide either a data processing job id to obtain node to index mappings"
 
-        job_id = model_training_job_id if model_training_job_id is not None else data_processing_job_id
-        job_details = self.describe_model_training_job(
-            job_id) if job_id == model_training_job_id else self.describe_data_processing_job(job_id)
-        filename = DEFAULT_TRAINING_MAPPING_INFO if job_id == model_training_job_id else DEFAULT_PROCESSING_MAPPING_INFO
-        mapping_key = DEFAULT_TRAINING_MAPPING_KEY if job_id == model_training_job_id else DEFAULT_PROCESSING_MAPPING_KEY
+        job_details = self.describe_data_processing_job(data_processing_job_id)
         job_s3_output = job_details["processingJob"]["outputLocation"]
 
         # get mappings
-        download_location = os.path.join(download_location, job_id)
-        s3_utils.download(os.path.join(job_s3_output, filename), download_location)
+        download_location = os.path.join(download_location, data_processing_job_id)
+        s3_utils.download(os.path.join(job_s3_output, DEFAULT_PROCESSING_MAPPING_INFO), download_location)
 
-        with open(os.path.join(download_location, filename), "rb") as f:
+        with open(os.path.join(download_location, DEFAULT_PROCESSING_MAPPING_INFO), "rb") as f:
             info = pickle.load(f)
-            mapping = info[mapping_key]
+            mapping = info[DEFAULT_PROCESSING_MAPPING_KEY]
             embedding_index_mapping = None
-            if job_id == model_training_job_id:
-                if DEFAULT_ENTITY_MAPPING_KEY in info:
-                    embedding_index_mapping = info[DEFAULT_ENTITY_MAPPING_KEY]
             if vertex_label is not None:
                 if vertex_label in mapping:
                     mapping = mapping[vertex_label]
@@ -713,7 +705,7 @@ class NeptuneMLClient():
         assert model_training_job_id is not None, "model_training_job_id is required"
         training_job_s3_output = self.describe_model_training_job(model_training_job_id)["processingJob"][
             "outputLocation"]
-        download_directory = os.path.join(download_location, training_job_name, "embeddings")
+        download_directory = os.path.join(download_location, model_training_job_id, "embeddings")
 
         s3_utils.download(os.path.join(training_job_s3_output, "embeddings"), download_directory, kms_key=kms_key)
         entity_emb = np.load(os.path.join(download_directory, DEFAULT_EMBEDDING_FILE_NAME))
@@ -725,7 +717,7 @@ class NeptuneMLClient():
         assert model_training_job_id is not None, "model_training_job_id is required"
         training_job_s3_output = self.describe_model_training_job(model_training_job_id)["processingJob"][
             "outputLocation"]
-        download_directory = os.path.join(download_location, training_job_name, "predictions")
+        download_directory = os.path.join(download_location, model_training_job_id, "predictions")
 
         s3_utils.download(os.path.join(training_job_s3_output, "predictions"), download_directory, kms_key)
         preds = np.load(os.path.join(download_directory, DEFAULT_PREDICTION_FILE_NAME))['infer_scores']
