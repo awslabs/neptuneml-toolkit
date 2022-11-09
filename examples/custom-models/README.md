@@ -5,6 +5,6 @@ This folder contains end-to-end workflow examples for implementing and running c
 ## Organization
 
 * [Introductory Examples](./introduction)  **(Start here!)**
-* [Advanced Examples](./advanced)
 * [Examples on Fraud and Abuse detection](./fraud-and-abuse)
 * [Examples on Recommender System](./recommendations)
+* [Advanced Examples](./advanced)* 
