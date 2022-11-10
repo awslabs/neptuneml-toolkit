@@ -400,10 +400,11 @@ class NeptuneMLClient():
                                        s3_file_name=DEFAULT_TRAINING_CONFIG_FILE_NAME)
 
         if customModelTrainingParameters is not None:
+            customModelTrainingParameters = dict(customModelTrainingParameters)
             assert 'sourceS3DirectoryPath' in customModelTrainingParameters, "sourceS3DirectoryPath must be provided in customModelTrainingParameters"
             if 'sourceDirectory' in customModelTrainingParameters:
                 source_directory = customModelTrainingParameters.pop('sourceDirectory')
-                s3_utils.upload(source_directory, customModelTrainingParameters['soureS3DirectoryPath'])
+                s3_utils.upload(source_directory, customModelTrainingParameters['sourceS3DirectoryPath'])
 
         if params:
             dataProcessingJobId = dataProcessingJobId or params['dataProcessingJobId']
@@ -515,10 +516,11 @@ class NeptuneMLClient():
         assert modelTransformOutputS3Location is not None, "modelTransformOutputS3Location is required"
 
         if customModelTransformParameters is not None:
+            customModelTransformParameters = dict(customModelTransformParameters)
             assert 'sourceS3DirectoryPath' in customModelTrainingParameters, "sourceS3DirectoryPath must be provided in customModelTrainingParameters"
             if 'sourceDirectory' in customModelTrainingParameters:
                 source_directory = customModelTrainingParameters.pop('sourceDirectory')
-                s3_utils.upload(source_directory, customModelTrainingParameters['soureS3DirectoryPath'])
+                s3_utils.upload(source_directory, customModelTrainingParameters['sourceS3DirectoryPath'])
 
         if not params:
             params = {}
