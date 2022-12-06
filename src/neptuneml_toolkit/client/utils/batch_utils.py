@@ -11,7 +11,7 @@ batch_log_group_name = '/aws/batch/job'
 
 batch = boto3.client(
     service_name='batch',
-    region_name='us-west-2',
+    region_name=region_name,
     endpoint_url='https://batch.{region_name}.amazonaws.com'.format(region_name=region_name))
 
 def wait_for_job(jobId):
