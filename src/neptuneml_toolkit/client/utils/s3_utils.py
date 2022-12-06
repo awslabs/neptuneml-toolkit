@@ -22,8 +22,8 @@ def download(s3_location, local_path, kms_key=None):
     :param kms_key: kms key to decrypt file
     :return:
     """
-    os.makedirs(local_directory, exist_ok=True)
-    return S3Downloader().download(s3_location, local_directory, kms_key=kms_key)
+    os.makedirs(local_path, exist_ok=True)
+    return S3Downloader().download(s3_location, local_path, kms_key=kms_key)
 
 def upload_config(config, s3_location, s3_file_name=None, kms_key=None):
     """
