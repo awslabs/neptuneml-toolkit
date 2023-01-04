@@ -1,3 +1,3 @@
 .. card::
    :title: Client
-   :link: client.html
+   :link: client
