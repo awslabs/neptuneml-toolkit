@@ -22,7 +22,7 @@
 from setuptools import find_packages
 from setuptools import setup
 
-VERSION = '0.0.1'
+VERSION = '0.0.2.dev2'
 setup(
     name='neptuneml-toolkit',
     version=VERSION,
