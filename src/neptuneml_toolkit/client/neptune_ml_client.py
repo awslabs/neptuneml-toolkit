@@ -122,6 +122,10 @@ class NeptuneMLClient():
         self.s3_output_encryption_kms_key = s3_output_encryption_kms_key
 
     def check_enabled(self):
+        """
+        check whether the current environment and neptune cluster is configured for Neptune ML
+        :return:
+        """
         try:
             assert self.get_host() is not None
             data_processing_job = self.list_data_processing_jobs()
@@ -134,6 +138,11 @@ class NeptuneMLClient():
                 Please configure the cluster according to the Amazon Neptune ML documentation before proceeding.''')
 
     def get_export_service_host(self):
+        """
+        get the host url for the Neptune ML export service. Assumes it's set by user or in .bashrc
+        :return:
+        """
+
         if self._export_service_host is not None:
             return self._export_service_host
         try:
@@ -197,9 +206,6 @@ class NeptuneMLClient():
 
         return params
 
-    def get_timestamp_job_name(self, prefix):
-        return f'{prefix}-{int(time.time())}'
-
     def create_data_export_job(self,
                                command=None,
                                outputS3Path=None,
@@ -211,6 +217,23 @@ class NeptuneMLClient():
                                ssl=True,
                                wait=False,
                                params={}):
+        """
+        Create a new Neptune ML data export job. See https://docs.aws.amazon.com/neptune/latest/userguide/export-parameters.html for details on the parameters
+        If wait is set to True, this waits for the jobs to complete and streams logs to std out.
+
+        :param command: determines whether to export property-graph data or RDF data.
+        :param outputS3Path: The URI of an Amazon S3 location to which the exported files can be published (Required)
+        :param jobSize: the size of the export job you are starting. options - ["small", "medium", "large", "xlarge"]
+        :param exportProcessParams: a JSON dict that contains parameters that you use to control the export process itself see: https://docs.aws.amazon.com/neptune/latest/userguide/export-params-fields.html
+        :param additionalParams: additionalParams top-level parameter is a JSON object that contains parameters you can use to control actions that are applied to the data after it has been exported see: https://docs.aws.amazon.com/neptune/latest/userguide/machine-learning-data-export.html#machine-learning-additionalParams
+        :param export_url: url of the Neptune export service. See get_export_service_host()
+        :param export_iam: Whether to use iam authentication for export service calls. default True
+        :param ssl: Whether to enable SSL. default True
+        :param wait: Whether to run job synchronously and wait for job to complete. default False
+        :param params: a JSON dict for export parameters to use instead of the kwargs above to simplify parameter management. See https://docs.aws.amazon.com/neptune/latest/userguide/export-parameters.html
+
+        :return: a JSON dict with the job response
+        """
         if params:
             assert "command" in params, "'command' must be in params and be one of export_pg or export_rdf"
             assert "outputS3Path" in params, "'outputS3Path' must be in params"
@@ -241,6 +264,16 @@ class NeptuneMLClient():
         return export_job
 
     def describe_data_export_job(self, id, export_url=None, export_iam=True, ssl=True):
+        """
+        Describe details of a Neptune ML data export job
+
+        :param id: id of the export job
+        :param export_url: url of the Neptune export service. See get_export_service_host()
+        :param export_iam: Whether to use iam authentication for export service calls. default True
+        :param ssl: Whether to enable SSL. default True
+
+        :return: a JSON dict with the job response
+        """
         if export_iam:
             self.builder = self.builder.with_iam(get_session())
         export_client = self.builder.build()
@@ -252,6 +285,13 @@ class NeptuneMLClient():
         return export_job
 
     def get_training_data_configuration(self, export_job_id):
+        """
+        Get training data configuration from the file that is created by a Neptune ML data export job
+
+        :param export_job_id: id of the export job
+
+        :return: a JSON dict with the configuration
+        """
         export_job = self.describe_data_export_job(export_job_id)
         return s3_utils.get_config(export_job['outputS3Uri'], DEFAULT_PROCESSING_CONFIG_FILE_NAME)
 
@@ -274,12 +314,35 @@ class NeptuneMLClient():
                                    trainingDataConfiguration=None,
                                    params={},
                                    wait=False):
+        """
+        Create a new Neptune ML data processing job. See https://docs.aws.amazon.com/neptune/latest/userguide/machine-learning-api-dataprocessing.html#machine-learning-api-dataprocessing-create-job for details
+        If wait is set to True, this waits for the jobs to complete and streams logs to std out.
+
+        :param id: A unique identifier for the new job. if None a uuid based id is autogenerated
+        :param previousDataProcessingJobId: The job ID of a completed data processing job run on an earlier version of the data for incremental offline inference workflows
+        :param inputDataS3Location: The URI of the Amazon S3 location where you want SageMaker to download the data needed to run the data processing job (Required)
+        :param processedDataS3Location: The URI of the Amazon S3 location where you want SageMaker to save the results of a data processing job (Required)
+        :param sagemakerIamRoleArn: The Amazon Resource Name (ARN) of an IAM role that is passed to SageMaker and can be assumed by SageMaker to perform tasks on your behalf.
+        :param neptuneIamRoleArn: The ARN of an IAM role for calling SageMaker. Note: This must be listed in your DB cluster parameter group or an error will occur.
+        :param processingInstanceType: The type of ML instance used during data processing. Its memory should be large enough to hold the processed dataset.
+        :param processingInstanceVolumeSizeInGB: The disk volume size of the processing instance. Both input data and processed data are stored on disk, so the volume size must be large enough to hold both data sets.
+        :param processingTimeOutInSeconds: Timeout in seconds for the data processing job.
+        :param modelType: One of the two model types that Neptune ML currently supports: heterogeneous graph models (heterogeneous), and knowledge graph (kge)
+        :param configFileName: A data specification file that describes how to load the exported graph data for training. The file is automatically generated by the Neptune export toolkit default training-data-configuration.json
+        :param subnets: The IDs of the subnets in the Neptune VPC
+        :param securityGroupIds: The VPC security group IDs.
+        :param volumeEncryptionKMSKey: The AWS Key Management Service (AWS KMS) key that SageMaker uses to encrypt data on the storage volume attached to the ML compute instances that run the processing job
+        :param s3OutputEncryptionKMSKey: The AWS Key Management Service (AWS KMS) key that SageMaker uses to encrypt the output of the training job.
+        :param trainingDataConfiguration: a JSON dict with the configuration to load the exported graph data for training. If not None, the configuration is uploaded to S3 and overwrites the file at inputDataS3Location/configFileName
+        :param params: a JSON dict for data processing parameters to use instead of the kwargs above to simplify parameter management
+        :param wait: Whether to run job synchronously and wait for job to complete. default False
+
+        :return: a JSON dict with the job response
+        """
 
         if trainingDataConfiguration is not None:
             if type(trainingDataConfiguration) == str:
-                assert os.path.exists(
-                    trainingDataConfiguration), "trainingDataConfiguration file not found at path {}".format(
-                    trainingDataConfiguration)
+                assert os.path.exists(trainingDataConfiguration), "trainingDataConfiguration file not found at path {}".format(trainingDataConfiguration)
                 s3_utils.upload_config(trainingDataConfiguration, inputDataS3Location)
             else:
                 assert type(trainingDataConfiguration) == dict
@@ -319,6 +382,14 @@ class NeptuneMLClient():
         return data_processing_job
 
     def describe_data_processing_job(self, id, neptuneIamRoleArn=None, verbose=False):
+        """
+
+        :param id: identifier of the data processing job
+        :param neptuneIamRoleArn: The ARN of an IAM role for calling SageMaker
+        :param verbose: Whether to include granular job details from SageMaker Processing job
+
+        :return: a JSON dict with the job response
+        """
         neptuneIamRoleArn = neptuneIamRoleArn or self.neptune_iam_role_arn
         if neptuneIamRoleArn is not None:
             data_processing_status = self.client.dataprocessing_job_status(id, neptune_iam_role_arn=neptuneIamRoleArn)
@@ -335,6 +406,14 @@ class NeptuneMLClient():
         return data_processing_job
 
     def list_data_processing_jobs(self, maxItems=10, neptuneIamRoleArn=None):
+        """
+        List data processing jobs associated with the current DB cluster config
+
+        :param maxItems: number of Items to return at once
+        :param neptuneIamRoleArn: The ARN of an IAM role for calling SageMaker
+
+        :return: a JSON list with the job response
+        """
         neptuneIamRoleArn = neptuneIamRoleArn or self.neptune_iam_role_arn
         if neptuneIamRoleArn is not None:
             list_result = self.client.dataprocessing_list(max_items=maxItems, neptune_iam_role_arn=neptuneIamRoleArn)
@@ -344,6 +423,14 @@ class NeptuneMLClient():
         return list_result.json()
 
     def stop_data_processing_job(self, id, clean=False, neptuneIamRoleArn=None):
+        """
+        Stop an existing data processing job.
+
+        :param id: identifier of the data processing job
+        :param clean: whether to delete any S3 artifacts created by the stopped job
+        :param neptuneIamRoleArn: The ARN of an IAM role for calling SageMaker
+        :return:
+        """
         neptuneIamRoleArn = neptuneIamRoleArn or self.neptune_iam_role_arn
         if neptuneIamRoleArn is not None:
             stop_result = self.client.modeltransform_stop(id, clean=clean, neptune_iam_role_arn=neptuneIamRoleArn)
@@ -352,11 +439,24 @@ class NeptuneMLClient():
         stop_result.raise_for_status()
 
     def get_model_hpo_configuration(self, data_processing_job_id):
+        """
+        Get model and hpo configuration from the file that is created by a Neptune ML data processing job
+
+        :param data_processing_job_id: id of the data processing job
+
+        :return: a JSON dict with the configuration
+        """
         data_processing_job = self.describe_data_processing_job(data_processing_job_id)
         return s3_utils.get_config(data_processing_job["processingJob"]["outputLocation"],
                                    DEFAULT_TRAINING_CONFIG_FILE_NAME)
 
     def get_model_training_instance_recommendation(self, data_processing_job_id):
+        """
+        Get configuration for recommended model training instance from the file that is created by a Neptune ML data processing job
+
+        :param data_processing_job_id: id of the data processing job
+        :return:
+        """
         data_processing_job = self.describe_data_processing_job(data_processing_job_id)
         return s3_utils.get_config(data_processing_job["processingJob"]["outputLocation"], DEFAULT_TRAIN_INSTANCE_REC)
 
@@ -383,6 +483,35 @@ class NeptuneMLClient():
                                   modelHPOConfiguration=None,
                                   params={},
                                   wait=False):
+        """
+        Create a new Neptune ML model training job. See https://docs.aws.amazon.com/neptune/latest/userguide/machine-learning-api-modeltraining.html#machine-learning-api-modeltraining-create-job for details
+        If wait is set to True, this waits for the jobs to complete and streams logs to std out.
+
+        :param id: A unique identifier for the new job. if None a uuid based id is autogenerated
+        :param dataProcessingJobId: The job Id of the completed data-processing job that has created the data for this training job. (Required)
+        :param trainModelS3Location: The location in Amazon S3 where the model artifacts are to be stored (Required)
+        :param previousModelTrainingJobId: The job ID of a completed model-training job that you want to update incrementally with this training job
+        :param sagemakerIamRoleArn: The Amazon Resource Name (ARN) of an IAM role that is passed to SageMaker and can be assumed by SageMaker to perform tasks on your behalf.
+        :param neptuneIamRoleArn: The ARN of an IAM role for calling SageMaker. Note: This must be listed in your DB cluster parameter group or an error will occur.
+        :param modelName: The model type for training. By default the ML model is automatically based on the modelType used in data processing, but you can specify a different model type here. For heterogeneous graphs: rgcn. For kge graphs: transe, distmult, or rotate. For a custom model implementation: custom.
+        :param baseProcessingInstanceType: The type of ML instance used in preparing and managing training of ML models.
+        :param trainingInstanceType: The type of ML instance used for model training. All Neptune ML models support CPU and GPU training
+        :param trainingInstanceVolumeSizeInGB: The disk volume size of the training instance. Both input data and the output model are stored on disk, so the volume size must be large enough to hold both data sets.
+        :param trainingTimeOutInSeconds: Timeout in seconds for the training job.
+        :param maxHPONumberOfTrainingJobs: Maximum total number of training jobs to start for the hyperparameter tuning job.
+        :param maxHPOParallelTrainingJobs: Maximum number of parallel training jobs to start for the hyperparameter tuning job.
+        :param subnets: The IDs of the subnets in the Neptune VPC
+        :param securityGroupIds: The VPC security group IDs.
+        :param volumeEncryptionKMSKey: The AWS Key Management Service (AWS KMS) key that SageMaker uses to encrypt data on the storage volume attached to the ML compute instances that run the processing job
+        :param s3OutputEncryptionKMSKey: The AWS Key Management Service (AWS KMS) key that SageMaker uses to encrypt the output of the training job.
+        :param enableManagedSpotTraining: Optimizes the cost of training machine learning models by using Amazon Elastic Compute Cloud spot instances
+        :param customModelTrainingParameters: The configuration for custom model training. This is a JSON object with the following fields sourceDirectory, sourceS3DirectoryPath, trainingEntryPointScript, transformEntryPointScript
+        :param modelHPOConfiguration: a JSON dict with the configuration for managing model training and HPO. If not None, the configuration is uploaded to S3 and overwrites the file at inputDataS3Location/model-hpo-configuration.json
+        :param params: a JSON dict for model training parameters to use instead of the kwargs above to simplify parameter management
+        :param wait: Whether to run job synchronously and wait for job to complete. default False
+
+        :return: a JSON dict with the job response
+        """
         assert dataProcessingJobId is not None or "dataProcessingJobId" in params, "dataProcessingId is required"
         assert trainModelS3Location is not None or "trainModelS3ocation" in params, "trainModelS3Location is required"
         if modelHPOConfiguration is not None:
@@ -451,6 +580,14 @@ class NeptuneMLClient():
         return model_training_job
 
     def describe_model_training_job(self, id, neptuneIamRoleArn=None, verbose=False):
+        """
+
+        :param id: identifier of the model training job
+        :param neptuneIamRoleArn: The ARN of an IAM role for calling SageMaker
+        :param verbose: Whether to include granular job details from SageMaker Processing job
+
+        :return: a JSON dict with the job response
+        """
         neptuneIamRoleArn = neptuneIamRoleArn or self.neptune_iam_role_arn
         if neptuneIamRoleArn is not None:
             model_training_status = self.client.modeltraining_job_status(id, neptune_iam_role_arn=neptuneIamRoleArn)
@@ -470,6 +607,14 @@ class NeptuneMLClient():
         return model_training_job
 
     def list_model_training_jobs(self, maxItems=10, neptuneIamRoleArn=None):
+        """
+        List model training jobs associated with the current DB cluster config
+
+        :param maxItems: number of Items to return at once
+        :param neptuneIamRoleArn: The ARN of an IAM role for calling SageMaker
+
+        :return: a JSON list with the job response
+        """
         neptuneIamRoleArn = neptuneIamRoleArn or self.neptune_iam_role_arn
         if neptuneIamRoleArn is not None:
             list_result = self.client.modeltraining_list(max_items=maxItems, neptune_iam_role_arn=neptuneIamRoleArn)
@@ -479,6 +624,14 @@ class NeptuneMLClient():
         return list_result.json()
 
     def stop_model_training_job(self, id, clean=False, neptuneIamRoleArn=None):
+        """
+        Stop an existing model training job.
+
+        :param id: identifier of the model training job
+        :param clean: whether to delete any S3 artifacts created by the stopped job
+        :param neptuneIamRoleArn: The ARN of an IAM role for calling SageMaker
+        :return:
+        """
         neptuneIamRoleArn = neptuneIamRoleArn or self.neptune_iam_role_arn
         if neptuneIamRoleArn is not None:
             stop_result = self.client.modeltraining_stop(id, clean=clean, neptune_iam_role_arn=neptuneIamRoleArn)
@@ -494,7 +647,6 @@ class NeptuneMLClient():
                                    modelTransformOutputS3Location=None,
                                    sagemakerIamRoleArn=None,
                                    neptuneIamRoleArn=None,
-                                   modelName=None,
                                    baseProcessingInstanceType=None,
                                    baseProcessingInstanceVolumeSizeInGB=None,
                                    subnets=None,
@@ -504,6 +656,29 @@ class NeptuneMLClient():
                                    customModelTransformParameters=None,
                                    params={},
                                    wait=False):
+        """
+        Create a new Neptune ML model transform job. See https://docs.aws.amazon.com/neptune/latest/userguide/machine-learning-api-modeltransform.html#machine-learning-api-modeltransform-create-job for details
+        If wait is set to True, this waits for the jobs to complete and streams logs to std out.
+
+        :param id: A unique identifier for the new job. if None a uuid based id is autogenerated
+        :param dataProcessingJobId: The job Id of a completed data-processing job as input to the model transform job
+        :param mlModelTrainingJobId: The job Id of a completed model-training job with a generated best model that is used for the transform
+        :param trainingJobName: The name of a completed sagemaker training job. Only applicable when you want a different model other than the best model selected by Neptune ML for the transform. ignored if mlModelTrainingJobId is passed in
+        :param modelTransformOutputS3Location: The location in Amazon S3 where new model artifacts and predictions are to be stored (Required)
+        :param sagemakerIamRoleArn: The Amazon Resource Name (ARN) of an IAM role that is passed to SageMaker and can be assumed by SageMaker to perform tasks on your behalf.
+        :param neptuneIamRoleArn: The ARN of an IAM role for calling SageMaker. Note: This must be listed in your DB cluster parameter group or an error will occur.
+        :param baseProcessingInstanceType: The type of ML instance used in preparing and managing training of ML models.
+        :param baseProcessingInstanceVolumeSizeInGB: The disk volume size of the transform instance. Both input data and the output model are stored on disk, so the volume size must be large enough to hold both data sets.
+        :param subnets: The IDs of the subnets in the Neptune VPC
+        :param securityGroupIds: The VPC security group IDs.
+        :param volumeEncryptionKMSKey: The AWS Key Management Service (AWS KMS) key that SageMaker uses to encrypt data on the storage volume attached to the ML compute instances that run the processing job
+        :param s3OutputEncryptionKMSKey: The AWS Key Management Service (AWS KMS) key that SageMaker uses to encrypt the output of the training job.
+        :param customModelTransformParameters: The configuration for doing transform for a custom model. This is a JSON object with the following fields sourceDirectory, sourceS3DirectoryPath, trainingEntryPointScript, transformEntryPointScript
+        :param params: a JSON dict for model transform parameters to use instead of the kwargs above to simplify parameter management
+        :param wait: Whether to run job synchronously and wait for job to complete. default False
+
+        :return: a JSON dict with the job response
+        """
         dataProcessingJobId = dataProcessingJobId or params.get('dataProcessingJobId', None)
         mlModelTrainingJobId = mlModelTrainingJobId or params.get('mlModelTrainingJobId', None)
         trainingJobName = trainingJobName or params.get('trainingJobName', None)
@@ -551,6 +726,13 @@ class NeptuneMLClient():
         return model_transform_job
 
     def describe_model_transform_job(self, id, neptuneIamRoleArn=None, verbose=False):
+        """
+        :param id: identifier of the model transform job
+        :param neptuneIamRoleArn: The ARN of an IAM role for calling SageMaker
+        :param verbose: Whether to include granular job details from SageMaker Processing job
+
+        :return: a JSON dict with the job response
+        """
         neptuneIamRoleArn = neptuneIamRoleArn or self.neptune_iam_role_arn
         if neptuneIamRoleArn is not None:
             model_transform_status = self.client.modeltransform_job_status(id, neptune_iam_role_arn=neptuneIamRoleArn)
@@ -567,6 +749,14 @@ class NeptuneMLClient():
         return model_transform_job
 
     def list_model_transform_jobs(self, maxItems=10, neptuneIamRoleArn=None):
+        """
+        List model transform jobs associated with the current DB cluster config
+
+        :param maxItems: number of Items to return at once
+        :param neptuneIamRoleArn: The ARN of an IAM role for calling SageMaker
+
+        :return: a JSON list with the job response
+        """
         neptuneIamRoleArn = neptuneIamRoleArn or self.neptune_iam_role_arn
         if neptuneIamRoleArn is not None:
             list_result = self.client.modeltransform_list(max_items=maxItems, neptune_iam_role_arn=neptuneIamRoleArn)
@@ -576,6 +766,14 @@ class NeptuneMLClient():
         return list_result.json()
 
     def stop_model_transform_job(self, id, clean=False, neptuneIamRoleArn=None):
+        """
+        Stop an existing model transform job.
+
+        :param id: identifier of the model transform job
+        :param clean: whether to delete any S3 artifacts created by the stopped job
+        :param neptuneIamRoleArn: The ARN of an IAM role for calling SageMaker
+        :return:
+        """
         neptuneIamRoleArn = neptuneIamRoleArn or self.neptune_iam_role_arn
         if neptuneIamRoleArn is not None:
             stop_result = self.client.modeltransform_stop(id, clean=clean, neptune_iam_role_arn=neptuneIamRoleArn)
@@ -588,13 +786,29 @@ class NeptuneMLClient():
                         mlModelTrainingJobId=None,
                         mlModelTransformJobId=None,
                         update=False,
-                        modelName=None,
                         neptuneIamRoleArn=None,
                         instanceType=None,
                         instanceCount=None,
                         volumeEncryptionKMSKey=None,
                         params={},
                         wait=False):
+        """
+        Create a new Neptune ML inference endpoint. See https://docs.aws.amazon.com/neptune/latest/userguide/machine-learning-api-endpoints.html#machine-learning-api-endpoints-create-job for details
+        If wait is set to True, the call is synchronous and waits for endpoint creation to complete
+
+        :param id: A unique identifier for the new endpoint. if None a uuid based id is autogenerated
+        :param mlModelTrainingJobId: The job Id of the completed model-training job that has created the model that the inference endpoint host.
+        :param mlModelTransformJobId: The job Id of the completed model-transform job that has created the model that the inference endpoint host
+        :param update: If present, this parameter indicates that this is an update request
+        :param neptuneIamRoleArn: The ARN of an IAM role for calling SageMaker. Note: This must be listed in your DB cluster parameter group or an error will occur.
+        :param instanceType: The type of ML instance used for hosting the endpoint
+        :param instanceCount: The number of instances to deploy to an endpoint for prediction.
+        :param volumeEncryptionKMSKey: The AWS Key Management Service (AWS KMS) key that SageMaker uses to encrypt data on the storage volume attached to the ML compute instance(s) that run the endpoints.
+        :param params: a JSON dict for model transform parameters to use instead of the kwargs above to simplify parameter management
+        :param wait: Whether to run job synchronously and wait for job to complete. default False
+
+        :return: a JSON list with the create response
+        """
         mlModelTrainingJobId = mlModelTrainingJobId or params.get('mlModelTrainingJobId', None)
         mlModelTransformJobId = mlModelTransformJobId or params.get('mlModelTransformJobId', None)
 
@@ -638,6 +852,20 @@ class NeptuneMLClient():
                         volumeEncryptionKMSKey=None,
                         params={},
                         wait=False):
+        """
+        Update an existing endpoint. parameters are describe in create_endpoint"
+
+        :param id:
+        :param mlModelTrainingJobId:
+        :param mlModelTransformJobId:
+        :param modelName:
+        :param instanceType:
+        :param instanceCount:
+        :param volumeEncryptionKMSKey:
+        :param params:
+        :param wait:
+        :return:
+        """
         return self.create_endpoint(id=id,
                                     mlModelTrainingJobId=mlModelTrainingJobId,
                                     mlModelTransformJobId=mlModelTransformJobId,
@@ -650,6 +878,14 @@ class NeptuneMLClient():
                                     update=True)
 
     def describe_endpoint(self, id, neptuneIamRoleArn=None, verbose=False):
+        """
+
+        :param id: identifier of the endpoint
+        :param neptuneIamRoleArn: The ARN of an IAM role for calling SageMaker
+        :param verbose: Whether to include granular job details from SageMaker Processing job
+
+        :return: a JSON dict with the endpoint response
+        """
         neptuneIamRoleArn = neptuneIamRoleArn or self.neptune_iam_role_arn
         if neptuneIamRoleArn is not None:
             endpoint_status = self.client.endpoints_status(id, neptune_iam_role_arn=neptuneIamRoleArn)
@@ -662,6 +898,15 @@ class NeptuneMLClient():
         return endpoint
 
     def list_endpoints(self, maxItems=10, neptuneIamRoleArn=None):
+        """
+        List model inference endpoints associated with the current DB cluster config
+
+        :param maxItems: number of Items to return at once
+        :param neptuneIamRoleArn: The ARN of an IAM role for calling SageMaker
+
+        :return: a JSON list with the endpoint response
+        """
+
         neptuneIamRoleArn = neptuneIamRoleArn or self.neptune_iam_role_arn
         if neptuneIamRoleArn is not None:
             list_result = self.client.endpoints(max_items=maxItems, neptune_iam_role_arn=neptuneIamRoleArn)
@@ -671,6 +916,13 @@ class NeptuneMLClient():
         return list_result.json()
 
     def delete_endpoint(self, id, neptuneIamRoleArn=None):
+        """
+        Delete an existing model inference endpoint.
+
+        :param id: identifier of the endpoint
+        :param neptuneIamRoleArn: The ARN of an IAM role for calling SageMaker
+        :return:
+        """
         neptuneIamRoleArn = neptuneIamRoleArn or self.neptune_iam_role_arn
         if neptuneIamRoleArn is not None:
             delete_result = self.client.endpoints_delete(id, neptune_iam_role_arn=neptuneIamRoleArn)
@@ -679,6 +931,15 @@ class NeptuneMLClient():
         delete_result.raise_for_status()
 
     def get_node_index_mapping(self, data_processing_job_id=None, vertex_label=None, download_location='./model-artifacts'):
+        """
+        Get the mapping object for Neptune vertex ids to the DGL Graph node index
+
+        :param data_processing_job_id: The job id of a completed data-processing job that created the DGL Graph
+        :param vertex_label: The vertex label you want a mapping for. if None, then all mappings for all vertex labels are returned
+        :param download_location: Local path to download the mapping object
+
+        :return: dict[node_type : dict[node_id: node_index]] For each node type/vertex label a mapping of ids to dgl node indices
+        """
         assert data_processing_job_id is not None, \
             "You must provide either a data processing job id to obtain node to index mappings"
 
@@ -704,6 +965,15 @@ class NeptuneMLClient():
         return mapping, embedding_index_mapping
 
     def get_embeddings(self, model_training_job_id, download_location='./model-artifacts', kms_key=None):
+        """
+        Get the node embeddings generated by a Neptune ML training job
+
+        :param model_training_job_id: The job id of a completed model-training job that created the embeddings
+        :param download_location: Local path to download the embedding file
+        :param kms_key: AWS KMS key that SageMaker uses to encrypt/decrypt the embeddings in S3
+
+        :return: numpy.NDArray. A dense embedding ndarray
+        """
         assert model_training_job_id is not None, "model_training_job_id is required"
         training_job_s3_output = self.describe_model_training_job(model_training_job_id)["processingJob"][
             "outputLocation"]
@@ -716,6 +986,16 @@ class NeptuneMLClient():
 
     def get_predictions(self, model_training_job_id, download_location='./model-artifacts', class_preds=False,
                         kms_key=None):
+        """
+        Get the node predictions generated by a Neptune ML training job
+
+        :param model_training_job_id: The job id of a completed model-training job that created the predictions
+        :param download_location: Local path to download the embedding file
+        :param class_preds: For classification predictions whether to apply argmax to return predicted class label
+        :param kms_key: AWS KMS key that SageMaker uses to encrypt/decrypt the embeddings in S3
+
+        :return: numpy.NDArray. An ndarray for the predictions
+        """
         assert model_training_job_id is not None, "model_training_job_id is required"
         training_job_s3_output = self.describe_model_training_job(model_training_job_id)["processingJob"][
             "outputLocation"]
@@ -730,6 +1010,12 @@ class NeptuneMLClient():
         return preds
 
     def get_model_performance_metrics(self, model_training_job_id):
+        """
+        Return validation and test metrics for a Neptune ML model traning job
+
+        :param model_training_job_id: The job id of a completed model-training job
+        :return: JSON dict containing model performance metrics
+        """
         assert model_training_job_id is not None, "model_training_job_id is required"
         training_job_s3_output = self.describe_model_training_job(model_training_job_id)["processingJob"][
             "outputLocation"]
@@ -742,6 +1028,13 @@ class NeptuneMLClient():
         return metrics
 
     def get_endpoint_instance_recommendation(self, model_training_job_id=None, model_transform_job_id=None):
+        """
+        Get configuration for recommended inference endpoint instance from the file that is created by a Neptune ML model training job or a Neptune ML model transform job
+
+        :param model_training_job_id: The job id of a completed model-training job
+        :param model_transform_job_id: The job id of a completed model-transform job
+        :return:
+        """
         assert model_training_job_id is not None or model_transform_job_id is not None, \
             "You must provide either a model training job id or a model transform job id to get endpoint instance recommendation"
 
@@ -754,6 +1047,22 @@ class NeptuneMLClient():
     def invoke_endpoint(self, task="link_predict", endpoint_id=None, endpoint_name=None, headNodeId=None,
                         tailNodeId=None,
                         headNodeType=None, tailNodeType=None, edgeType=None, property=None, topk=1):
+        """
+        invoke a Neptune ML endpoint directly in python for prediction on a single item i.e node or edge
+
+        :param task: The task that the model on the endpoint was trained for options ["node_property_prediction", "edge_property_prediction", "link_prediction"]
+        :param endpoint_id: The id of a created endpoint
+        :param endpoint_name: The name of a SageMaker endpoint
+        :param headNodeId: The main node id for prediction for node property prediction and outgoing link prediction
+        :param tailNodeId: The main node id for incoming link prediction. Also used for edge property prediction with headNodeId to define the edge for prediction
+        :param headNodeType: The node type or vertex label of headNodeId
+        :param tailNodeType: The node type or vertex label of tailNodeId
+        :param edgeType: The edge type or label of (headNodeId, tailNodeId) for edge property prediction tasks
+        :param property: The property to predict for the node or edge for property prediction types
+        :param topk: How many of the top results to return
+
+        :return: JSON response from the inference endpoint
+        """
         if endpoint_name is None:
             assert endpoint_id is not None, "endpoint id is a required argument if endpoint name is missing"
             endpoint_name = self.describe_endpoint(endpoint_id)["endpoint"]["name"]
