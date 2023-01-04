@@ -20,7 +20,7 @@ import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "."))
 
-project = "neptuneml_toolkit"
+project = "neptuneml-toolkit"
 version = pkg_resources.require(project)[0].version
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
