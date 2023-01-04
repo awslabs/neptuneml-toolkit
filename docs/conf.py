@@ -19,7 +19,6 @@ import sys
 import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "."))
-from doc_utils.jumpstart_doc_utils import create_jumpstart_model_table  # noqa: E402
 
 project = "neptuneml_toolkit"
 version = pkg_resources.require(project)[0].version
@@ -108,9 +107,3 @@ autosummary_generate = True
 
 # autosectionlabel
 autosectionlabel_prefix_document = True
-
-
-def setup(app):
-    sys.stdout.write("Generating JumpStart model table...")
-    sys.stdout.flush()
-    create_jumpstart_model_table()
