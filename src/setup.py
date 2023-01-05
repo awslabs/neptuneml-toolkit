@@ -22,6 +22,16 @@
 from setuptools import find_packages
 from setuptools import setup
 
+required_packages = [
+    "boto3>=1.26.28,<2.0",
+    "numpy>=1.9.0,<2.0",
+    "graph-notebook==3.7.0",
+    "sklearn==0.24.1",
+    "sagemaker==2.52.2.post0",
+    "dgl",
+    "torch"
+]
+
 VERSION = '0.0.2.dev2'
 setup(
     name='neptuneml-toolkit',
@@ -37,5 +47,6 @@ setup(
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: Apache Software License',
     ],
-    license='Apache 2.0'
+    license='Apache 2.0',
+    install_requires=required_packages,
 )
