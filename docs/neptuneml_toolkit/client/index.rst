@@ -1,9 +1,11 @@
-Neptune ML Toolkit Client
+Neptune ML Python Client
 --------------------------
 
-The Neptune ML Toolkit Client is a python SDK for orchestrating Neptune ML Workflows
+Orchestrate Neptune ML workflows with a python sdk.
 
 .. automodule:: neptuneml_toolkit.client
 .. autosummary::
 
-   NeptuneMLClient
+.. autoclass::  neptuneml_toolkit.NeptuneMLClient
+    :members:
+

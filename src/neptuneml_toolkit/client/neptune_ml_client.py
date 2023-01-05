@@ -44,23 +44,23 @@ class NeptuneMLClient():
         """
         Creates a NeptuneMLClient for interacting NeptuneML model management APIs
 
-        :param host:str the host url to form a connection with.
-        :param port:int the port to use when creating a connection. Default 8182
-        :param auth_mode:str type of authentication the cluster being connected to is using. Can be DEFAULT or IAM
-        :param use_ssl:bool whether to make connections to the created endpoint with ssl or not. Default True
-        :param region:str aws region your Neptune cluster is in. Default
-        :param load_from_s3_arn:str arn of role to use for bulk loader.
-        :param proxy_host:str the proxy host url to route a connection through.
-        :param proxy_port:int the proxy port to use when creating proxy connection. Default 8182
-        :param neptune_hosts:list of host snippets to use for identifying neptune endpoints. Default ["amazonaws.com"]
-        :param config_location:str location of existing Neptune db client config. Default '~/graph_notebook_config.json'
-        :param neptune_iam_role_arn:str arn of role used by neptune to for neptune ml commands
-        :param sagemaker_iam_role_arn:str arn of role to use within sagemaker jobs
-        :param subnets:
-        :param security_group_ids:
-        :param volume_encryption_kms_key:
-        :param s3_output_encryption_kms_key:
-        :param export_service_uri: url of Neptune export service
+        :param host: (str) the host url to form a connection with.
+        :param port: (int) the port to use when creating a connection. Default 8182
+        :param auth_mode: (str) type of authentication the cluster being connected to is using. Can be DEFAULT or IAM
+        :param use_ssl: (bool) whether to make connections to the created endpoint with ssl or not. Default True
+        :param region: (str) aws region your Neptune cluster is in. Default
+        :param load_from_s3_arn: (str) arn of role to use for bulk loader.
+        :param proxy_host: (str) the proxy host url to route a connection through.
+        :param proxy_port: (int) the proxy port to use when creating proxy connection. Default 8182
+        :param neptune_hosts: list of host snippets to use for identifying neptune endpoints. Default ["amazonaws.com"]
+        :param config_location: (str) location of existing Neptune db client config. Default '~/graph_notebook_config.json'
+        :param neptune_iam_role_arn: (str) arn of role used by neptune to for neptune ml commands
+        :param sagemaker_iam_role_arn: (str) arn of role to use within sagemaker jobs
+        :param subnets: list of the IDs of the subnets in the Neptune VPC
+        :param security_group_ids: list of The VPC security group IDs
+        :param volume_encryption_kms_key: (str) AWS KMS Key to be used for encypting the storage volume on all SageMaker jobs by the client
+        :param s3_output_encryption_kms_key: (str) AWS KMS Key to be used for encypting s3 objects by all SageMaker jobs by the client
+        :param export_service_uri: (str) url of Neptune export service
         """
         self.client = None
         self.neptune_cfg_allowlist = copy(neptune_hosts)
@@ -124,7 +124,6 @@ class NeptuneMLClient():
     def check_enabled(self):
         """
         check whether the current environment and neptune cluster is configured for Neptune ML
-        :return:
         """
         try:
             assert self.get_host() is not None
@@ -140,7 +139,6 @@ class NeptuneMLClient():
     def get_export_service_host(self):
         """
         get the host url for the Neptune ML export service. Assumes it's set by user or in .bashrc
-        :return:
         """
 
         if self._export_service_host is not None:
@@ -429,7 +427,6 @@ class NeptuneMLClient():
         :param id: identifier of the data processing job
         :param clean: whether to delete any S3 artifacts created by the stopped job
         :param neptuneIamRoleArn: The ARN of an IAM role for calling SageMaker
-        :return:
         """
         neptuneIamRoleArn = neptuneIamRoleArn or self.neptune_iam_role_arn
         if neptuneIamRoleArn is not None:
@@ -630,7 +627,6 @@ class NeptuneMLClient():
         :param id: identifier of the model training job
         :param clean: whether to delete any S3 artifacts created by the stopped job
         :param neptuneIamRoleArn: The ARN of an IAM role for calling SageMaker
-        :return:
         """
         neptuneIamRoleArn = neptuneIamRoleArn or self.neptune_iam_role_arn
         if neptuneIamRoleArn is not None:
@@ -772,7 +768,6 @@ class NeptuneMLClient():
         :param id: identifier of the model transform job
         :param clean: whether to delete any S3 artifacts created by the stopped job
         :param neptuneIamRoleArn: The ARN of an IAM role for calling SageMaker
-        :return:
         """
         neptuneIamRoleArn = neptuneIamRoleArn or self.neptune_iam_role_arn
         if neptuneIamRoleArn is not None:
@@ -853,18 +848,7 @@ class NeptuneMLClient():
                         params={},
                         wait=False):
         """
-        Update an existing endpoint. parameters are describe in create_endpoint"
-
-        :param id:
-        :param mlModelTrainingJobId:
-        :param mlModelTransformJobId:
-        :param modelName:
-        :param instanceType:
-        :param instanceCount:
-        :param volumeEncryptionKMSKey:
-        :param params:
-        :param wait:
-        :return:
+        Update an existing endpoint. parameters are described in create_endpoint
         """
         return self.create_endpoint(id=id,
                                     mlModelTrainingJobId=mlModelTrainingJobId,
@@ -921,7 +905,6 @@ class NeptuneMLClient():
 
         :param id: identifier of the endpoint
         :param neptuneIamRoleArn: The ARN of an IAM role for calling SageMaker
-        :return:
         """
         neptuneIamRoleArn = neptuneIamRoleArn or self.neptune_iam_role_arn
         if neptuneIamRoleArn is not None:
@@ -1033,7 +1016,7 @@ class NeptuneMLClient():
 
         :param model_training_job_id: The job id of a completed model-training job
         :param model_transform_job_id: The job id of a completed model-transform job
-        :return:
+        :return: JSON dict containing instance recommendations
         """
         assert model_training_job_id is not None or model_transform_job_id is not None, \
             "You must provide either a model training job id or a model transform job id to get endpoint instance recommendation"
