@@ -27,7 +27,7 @@ required_packages = [
     "numpy>=1.9.0,<2.0",
     "graph-notebook==3.7.0",
     "scikit-learn==0.24.1",
-    "sagemaker==2.52.2.post0",
+    "sagemaker==2.48.1",
     "dgl",
     "torch"
 ]
