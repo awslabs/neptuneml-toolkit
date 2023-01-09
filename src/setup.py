@@ -29,7 +29,7 @@ required_packages = [
     "scikit-learn==0.24.1",
     "sagemaker==2.48.1",
     "dgl==0.8.0.post1",
-    "torch==1.8.1"
+    "torch==1.13.1"
 ]
 
 VERSION = '0.0.2.dev2'
