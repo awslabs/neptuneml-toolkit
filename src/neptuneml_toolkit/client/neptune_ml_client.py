@@ -16,7 +16,7 @@ import pickle
 import time
 
 try:
-    DEFAULT_REGION = boto3.Session().region_name.region_name
+    DEFAULT_REGION = boto3.Session().region_name
 except:
     print("Could not get region from boto session. Use us-east-1 by default")
     DEFAULT_REGION = 'us-east-1'
