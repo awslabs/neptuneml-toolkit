@@ -8,17 +8,15 @@ import sagemaker
 try:
     boto_session = boto3.DEFAULT_SESSION or boto3.Session()
     region_name = boto_session.region_name
+    sm_session = sagemaker.session.Session()
+    sagemaker_client = boto3.session.Session(region_name=region_name).client(
+        service_name='sagemaker',
+        region_name=region_name,
+        endpoint_url='https://sagemaker.{region_name}.amazonaws.com'.format(region_name=region_name))
+
+    sagemaker_runtime = boto3.client('sagemaker-runtime', region_name=region_name)
 except:
-    print("Could not get region from boto session. Use us-east-1 by default")
-    region_name = 'us-east-1'
-
-sm_session = sagemaker.session.Session()
-sagemaker_client = boto3.session.Session(region_name=region_name).client(
-    service_name='sagemaker',
-    region_name=region_name,
-    endpoint_url='https://sagemaker.{region_name}.amazonaws.com'.format(region_name=region_name))
-
-sagemaker_runtime = boto3.client('sagemaker-runtime', region_name=region_name)
+    print("Could not initialize boto client")
 
 log_group_name = "/aws/sagemaker/ProcessingJobs"
 log_search_url = "https://{region_name}.console.aws.amazon.com/cloudwatch/home?region={region_name}#logStream:group={log_group_name};prefix={job_name}"
