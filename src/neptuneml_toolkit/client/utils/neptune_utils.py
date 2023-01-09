@@ -1,5 +1,13 @@
 import boto3
-neptune_client = boto3.client(service_name='neptune')
+
+try:
+    boto_session = boto3.DEFAULT_SESSION or boto3.Session()
+    region_name = boto_session.region_name
+except:
+    print("Could not get region from boto session. Use us-east-1 by default")
+    region_name = 'us-east-1'
+
+neptune_client = boto3.client(service_name='neptune', region_name=region_name)
 
 def get_db_cluster_parameter_group(neptune_host):
     identifier = neptune_host.split(".")[0]
