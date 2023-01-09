@@ -1,0 +1,13 @@
+sphinx==3.1.2
+sphinx-rtd-theme==0.5.0
+docutils==0.15.2
+packaging==20.9
+jinja2<3.1
+schema==0.7.5
+boto3>=1.26.28,<2.0
+numpy>=1.9.0,<2.0
+graph-notebook==3.7.0
+sklearn==0.24.1
+sagemaker==2.52.2.post0
+dgl
+torch
