@@ -7,16 +7,14 @@ from .cloudwatch_utils import print_logs
 try:
     boto_session = boto3.DEFAULT_SESSION or boto3.Session()
     region_name = boto_session.region_name
+    batch = boto3.client(
+        service_name='batch',
+        region_name=region_name,
+        endpoint_url='https://batch.{region_name}.amazonaws.com'.format(region_name=region_name))
 except:
-    print("Could not get region from boto session. Use us-east-1 by default")
-    region_name = 'us-east-1'
+    print("Could not initialize boto client")
 
 batch_log_group_name = '/aws/batch/job'
-
-batch = boto3.client(
-    service_name='batch',
-    region_name=region_name,
-    endpoint_url='https://batch.{region_name}.amazonaws.com'.format(region_name=region_name))
 
 def wait_for_job(jobId):
     spin = ['-', '/', '|', '\\', '-', '/', '|', '\\']

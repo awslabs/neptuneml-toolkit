@@ -4,7 +4,7 @@ from datetime import datetime
 try:
     boto_session = boto3.DEFAULT_SESSION or boto3.Session()
     region_name = boto_session.region_name
-    cloudwatch = boto3.session.Session(region_name=region_name).client(
+    cloudwatch = boto3.client(
         service_name='logs',
         region_name=region_name,
         endpoint_url='https://logs.{region_name}.amazonaws.com'.format(region_name=region_name))

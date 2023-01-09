@@ -9,7 +9,7 @@ try:
     boto_session = boto3.DEFAULT_SESSION or boto3.Session()
     region_name = boto_session.region_name
     sm_session = sagemaker.session.Session()
-    sagemaker_client = boto3.session.Session(region_name=region_name).client(
+    sagemaker_client = boto3.client(
         service_name='sagemaker',
         region_name=region_name,
         endpoint_url='https://sagemaker.{region_name}.amazonaws.com'.format(region_name=region_name))
