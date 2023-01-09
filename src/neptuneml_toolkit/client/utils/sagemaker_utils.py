@@ -13,7 +13,7 @@ except:
     region_name = 'us-east-1'
 
 sm_session = sagemaker.session.Session()
-sagemaker_client = boto3.client(
+sagemaker_client = boto3.session.Session(region_name=region_name).client(
     service_name='sagemaker',
     region_name=region_name,
     endpoint_url='https://sagemaker.{region_name}.amazonaws.com'.format(region_name=region_name))

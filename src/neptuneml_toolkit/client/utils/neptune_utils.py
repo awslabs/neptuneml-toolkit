@@ -7,7 +7,7 @@ except:
     print("Could not get region from boto session. Use us-east-1 by default")
     region_name = 'us-east-1'
 
-neptune_client = boto3.client(service_name='neptune', region_name=region_name)
+neptune_client =boto3.session.Session(region_name=region_name).client(service_name='neptune', region_name=region_name)
 
 def get_db_cluster_parameter_group(neptune_host):
     identifier = neptune_host.split(".")[0]
