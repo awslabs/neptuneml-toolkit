@@ -2,7 +2,11 @@ import boto3
 from datetime import datetime
 
 boto_session = boto3.DEFAULT_SESSION or boto3.Session()
-region_name = boto_session.region_name
+try:
+    region_name = boto_session.region_name
+except:
+    print("Could not get region from boto session. Use us-east-1 by default")
+    region_name = 'us-east-1'
 cloudwatch = boto3.client(
     service_name='logs',
     region_name=region_name,

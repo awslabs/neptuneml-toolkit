@@ -7,7 +7,12 @@ import sagemaker
 
 boto_session = boto3.DEFAULT_SESSION or boto3.Session()
 sm_session = sagemaker.session.Session()
-region_name = boto_session.region_name
+try:
+    region_name = boto_session.region_name
+except:
+    print("Could not get region from boto session. Use us-east-1 by default")
+    region_name = 'us-east-1'
+
 sagemaker_client = boto3.client(
     service_name='sagemaker',
     region_name=region_name,

@@ -15,7 +15,11 @@ import numpy as np
 import pickle
 import time
 
-DEFAULT_REGION = boto3.Session().region_name
+try:
+    DEFAULT_REGION = boto3.Session().region_name.region_name
+except:
+    print("Could not get region from boto session. Use us-east-1 by default")
+    DEFAULT_REGION = 'us-east-1'
 DEFAULT_PROCESSING_CONFIG_FILE_NAME = 'training-data-configuration.json'
 DEFAULT_TRAINING_CONFIG_FILE_NAME = 'model-hpo-configuration.json'
 DEFAULT_EMBEDDING_FILE_NAME = 'entity.npy'
