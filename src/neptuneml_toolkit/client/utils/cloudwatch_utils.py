@@ -9,8 +9,7 @@ except:
     region_name = 'us-east-1'
 cloudwatch = boto3.client(
     service_name='logs',
-    region_name=region_name,
-    endpoint_url='https://logs.{region_name}.amazonaws.com'.format(region_name=region_name))
+    region_name=region_name)
 
 def get_log_stream_name(log_group_name, log_stream_prefix):
     kwargs = {'logGroupName': log_group_name,
