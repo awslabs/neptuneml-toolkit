@@ -9,8 +9,7 @@ try:
     region_name = boto_session.region_name
     batch = boto3.client(
         service_name='batch',
-        region_name=region_name,
-        endpoint_url='https://batch.{region_name}.amazonaws.com'.format(region_name=region_name))
+        region_name=region_name)
 except:
     print("Could not initialize boto client")
 

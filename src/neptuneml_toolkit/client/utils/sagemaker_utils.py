@@ -11,8 +11,7 @@ try:
     sm_session = sagemaker.session.Session()
     sagemaker_client = boto3.client(
         service_name='sagemaker',
-        region_name=region_name,
-        endpoint_url='https://sagemaker.{region_name}.amazonaws.com'.format(region_name=region_name))
+        region_name=region_name)
 
     sagemaker_runtime = boto3.client('sagemaker-runtime', region_name=region_name)
 except:
