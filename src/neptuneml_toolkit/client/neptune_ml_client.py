@@ -928,7 +928,7 @@ class NeptuneMLClient():
         :return: dict[node_type : dict[node_id: node_index]] For each node type/vertex label a mapping of ids to dgl node indices
         """
         assert data_processing_job_id is not None, \
-            "You must provide either a data processing job id to obtain node to index mappings"
+            "You must provide a data processing job id to obtain node to index mappings"
 
         job_details = self.describe_data_processing_job(data_processing_job_id)
         job_s3_output = job_details["processingJob"]["outputLocation"]
@@ -950,6 +950,34 @@ class NeptuneMLClient():
                         list(mapping.keys())))
                     print("Returning mapping for all valid vertex labels")
         return mapping, embedding_index_mapping
+
+    def get_node_embedding_mapping(self, model_training_job_id=None, download_location='./model-artifacts'):
+        """
+        Get the mapping object for Neptune vertex ids to the DGL Graph node index and the mapping object for node type
+        to embedding index
+
+        :param model_training_job_id: The job id of a completed model-training job that created the embeddings
+        :param download_location: Local path to download the mapping object
+        :return: (dict[node_type : dict[node_id: node_index]], dict[node_type: np.array(idx)])
+                For each node type/vertex label a mapping of ids to dgl node indices as well as a mapping of ids to embeddings index
+        """
+        assert model_training_job_id is not None, \
+            "You must provide a model training job id to obtain node to index mappings"
+
+        job_details = self.describe_model_training_job(model_training_job_id)
+        job_s3_output = job_details["processingJob"]["outputLocation"]
+
+        # get mappings
+        download_location = os.path.join(download_location, model_training_job_id)
+        s3_utils.download(os.path.join(job_s3_output, DEFAULT_TRAINING_MAPPING_INFO), download_location)
+
+        with open(os.path.join(download_location, DEFAULT_TRAINING_MAPPING_INFO), "rb") as f:
+            info = pickle.load(f)
+            mapping = info[DEFAULT_TRAINING_MAPPING_KEY]
+            embedding_index_mapping = info[DEFAULT_ENTITY_MAPPING_KEY]
+
+        return mapping, embedding_index_mapping
+
 
     def get_embeddings(self, model_training_job_id, download_location='./model-artifacts', kms_key=None):
         """
