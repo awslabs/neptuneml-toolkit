@@ -516,7 +516,7 @@ class NeptuneMLClient():
         assert dataProcessingJobId is not None or "dataProcessingJobId" in params, "dataProcessingId is required"
         assert trainModelS3Location is not None or "trainModelS3ocation" in params, "trainModelS3Location is required"
         if modelHPOConfiguration is not None:
-            s3_train_input_uri = self.describe_data_processing_job(data_processing_job["id"],
+            s3_train_input_uri = self.describe_data_processing_job(dataProcessingJobId,
                                                                    neptuneIamRoleArn=neptuneIamRoleArn)[
                 "processingJob"]["outputLocation"]
             if type(modelHPOConfiguration) == str:
