@@ -30,7 +30,7 @@ required_packages = [
     "sagemaker>=2.48.1",
 ]
 
-VERSION = '0.0.2.dev5'
+VERSION = '0.0.2.dev6'
 setup(
     name='neptuneml-toolkit',
     version=VERSION,
