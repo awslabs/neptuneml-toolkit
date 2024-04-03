@@ -4,7 +4,8 @@ from copy import copy
 from botocore.session import get_session
 from graph_notebook.neptune.client import Client, ClientBuilder, NEPTUNE_CONFIG_HOST_IDENTIFIERS, \
     is_allowed_neptune_host
-from graph_notebook.configuration.generate_config import (generate_default_config, DEFAULT_CONFIG_LOCATION,
+
+from graph_notebook.configuration.generate_config import (generate_config, DEFAULT_CONFIG_LOCATION,
                                                           AuthModeEnum, Configuration)
 from graph_notebook.configuration.get_config import get_config
 from urllib.parse import urlparse
@@ -71,8 +72,9 @@ class NeptuneMLClient():
 
         if host is not None:
             auth_mode = auth_mode if auth_mode in [auth.value for auth in AuthModeEnum] else AuthModeEnum.DEFAULT.value
-            config = generate_config(host, port, AuthModeEnum(auth_mode), use_ssl, load_from_s3_arn, region,
-                                     proxy_host, proxy_port, neptune_hosts=neptune_hosts)
+            config = generate_config(host=host, port=port, auth_mode=AuthModeEnum(auth_mode), ssl=use_ssl,
+                                     load_from_s3_arn=load_from_s3_arn, aws_region=region,
+                                     proxy_host=proxy_host, proxy_port=proxy_port, neptune_hosts=neptune_hosts)
         else:
             self.config_location = config_location or os.getenv('GRAPH_NOTEBOOK_CONFIG', DEFAULT_CONFIG_LOCATION)
             config = get_config(self.config_location, neptune_hosts=self.neptune_cfg_allowlist)
