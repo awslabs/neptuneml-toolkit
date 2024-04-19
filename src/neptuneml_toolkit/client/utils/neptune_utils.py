@@ -4,8 +4,8 @@ try:
     boto_session = boto3.DEFAULT_SESSION or boto3.Session()
     region_name = boto_session.region_name
     neptune_client = boto3.client(service_name='neptune', region_name=region_name)
-except:
-    print("Could not initialize boto client")
+except Exception as e:
+    print("Could not initialize boto client: %s" % e)
 
 def get_db_cluster_parameter_group(neptune_host):
     identifier = neptune_host.split(".")[0]
