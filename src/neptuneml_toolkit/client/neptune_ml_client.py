@@ -516,7 +516,9 @@ class NeptuneMLClient():
         :return: a JSON dict with the job response
         """
         assert dataProcessingJobId is not None or "dataProcessingJobId" in params, "dataProcessingId is required"
-        assert trainModelS3Location is not None or "trainModelS3ocation" in params, "trainModelS3Location is required"
+        assert trainModelS3Location is not None or "trainModelS3Location" in params, "trainModelS3Location is required"
+
+        dataProcessingJobId = dataProcessingJobId or params.get('dataProcessingJobId')
         if modelHPOConfiguration is not None:
             s3_train_input_uri = self.describe_data_processing_job(dataProcessingJobId,
                                                                    neptuneIamRoleArn=neptuneIamRoleArn)[
