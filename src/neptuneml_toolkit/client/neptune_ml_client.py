@@ -355,7 +355,7 @@ class NeptuneMLClient():
 
         if params:
             assert 'inputDataS3Location' in params or inputDataS3Location, "inputDataS3Location must be provided"
-            assert 'processedDatas3Location' in params or processedDataS3Location, "processedDataS3Location must be provided"
+            assert 'processedDataS3Location' in params or processedDataS3Location, "processedDataS3Location must be provided"
             inputDataS3Location = inputDataS3Location or params['inputDataS3Location']
             processedDataS3Location = processedDataS3Location or params['processedDataS3Location']
         else:
