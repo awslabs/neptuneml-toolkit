@@ -355,7 +355,7 @@ class NeptuneMLClient():
 
         if params:
             assert 'inputDataS3Location' in params or inputDataS3Location, "inputDataS3Location must be provided"
-            assert 'processedDatas3Location' in params or processedDataS3Location, "processedDataS3Location must be provided"
+            assert 'processedDataS3Location' in params or processedDataS3Location, "processedDataS3Location must be provided"
             inputDataS3Location = inputDataS3Location or params['inputDataS3Location']
             processedDataS3Location = processedDataS3Location or params['processedDataS3Location']
         else:
@@ -516,7 +516,9 @@ class NeptuneMLClient():
         :return: a JSON dict with the job response
         """
         assert dataProcessingJobId is not None or "dataProcessingJobId" in params, "dataProcessingId is required"
-        assert trainModelS3Location is not None or "trainModelS3ocation" in params, "trainModelS3Location is required"
+        assert trainModelS3Location is not None or "trainModelS3Location" in params, "trainModelS3Location is required"
+
+        dataProcessingJobId = dataProcessingJobId or params.get('dataProcessingJobId')
         if modelHPOConfiguration is not None:
             s3_train_input_uri = self.describe_data_processing_job(dataProcessingJobId,
                                                                    neptuneIamRoleArn=neptuneIamRoleArn)[
