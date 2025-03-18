@@ -1,3 +1,12 @@
+<hr />
+
+# Deprecation Notice
+
+The NeptuneML Tookit is no longer being actively maintained.  To use Neptune ML, please refer to the [official documentation](https://docs.aws.amazon.com/neptune/latest/userguide/machine-learning.html) for the supported features and endpoints.
+<br />
+<hr />
+
+
 ![banner](images/banner.png)
 
 ## Neptune ML Toolkit
