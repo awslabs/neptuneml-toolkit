@@ -7,7 +7,7 @@ schema==0.7.5
 boto3>=1.26.28,<2.0
 numpy>=1.9.0,<2.0
 graph-notebook==3.7.0
-scikit-learn==1.0.1
+scikit-learn==1.5.0
 sagemaker==2.218.0
 dgl==0.9.0
 torch==1.13.1
